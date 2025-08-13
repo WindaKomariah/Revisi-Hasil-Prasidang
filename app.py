@@ -549,6 +549,17 @@ if 'kepsek_current_menu' not in st.session_state:
     st.session_state.kepsek_current_menu = "Lihat Hasil Klasterisasi"
 
 
+# --- FUNGSI CALLBACK BARU UNTUK NAVIGASI ---
+def set_menu(menu_name):
+    st.session_state.current_menu = menu_name
+
+def set_kepsek_menu(menu_name):
+    st.session_state.kepsek_current_menu = menu_name
+    
+def logout():
+    st.session_state.clear()
+    st.rerun()
+
 # --- FUNGSI HALAMAN UTAMA (UNTUK SETIAP PERAN) ---
 
 def show_operator_tu_page():
@@ -577,12 +588,10 @@ def show_operator_tu_page():
         }
         display_name = f"{icon_map.get(option, '')} {option}"
         button_key = f"nav_button_{option.replace(' ', '_').replace('&', 'and')}"
+        # Menggunakan on_click callback
+        st.sidebar.button(display_name, key=button_key, on_click=set_menu, args=(option,))
 
-        if st.sidebar.button(display_name, key=button_key):
-            st.session_state.current_menu = option
-            st.rerun()
-
-    # Logika untuk menandai tombol aktif
+    # Logika untuk menandai tombol aktif (dengan CSS)
     js_highlight_active_button = f"""
     <script>
         function cleanButtonText(text) {{
@@ -621,11 +630,12 @@ def show_operator_tu_page():
         st.markdown(js_highlight_active_button, unsafe_allow_html=True)
     
     st.sidebar.markdown("---")
-    if st.sidebar.button("🚪 Keluar", key="logout_tu_sidebar"):
-        st.session_state.clear()
-        st.rerun()
+    st.sidebar.button("🚪 Keluar", key="logout_tu_sidebar", on_click=logout)
+
+    # ... Konten halaman tetap sama ...
 
     if st.session_state.current_menu == "Unggah Data":
+        # ... (konten Unggah Data)
         st.header("Unggah Data Siswa")
         st.markdown("""
         <div style='background-color:#e3f2fd; padding:15px; border-radius:10px; border-left: 5px solid #2196F3;'>
@@ -654,6 +664,7 @@ def show_operator_tu_page():
                 st.error(f"Terjadi kesalahan saat membaca file: {e}. Pastikan format file Excel benar dan tidak rusak.")
 
     elif st.session_state.current_menu == "Praproses & Normalisasi Data":
+        # ... (konten Praproses & Normalisasi Data)
         st.header("Praproses Data & Normalisasi Z-score")
         if st.session_state.df_original is None or st.session_state.df_original.empty:
             st.warning("Silakan unggah data terlebih dahulu di menu 'Unggah Data'.")
@@ -681,6 +692,7 @@ def show_operator_tu_page():
                     st.markdown("<div style='margin-top: 20px;'></div>", unsafe_allow_html=True)
 
     elif st.session_state.current_menu == "Klasterisasi Data K-Prototypes":
+        # ... (konten Klasterisasi Data K-Prototypes)
         st.header("Klasterisasi K-Prototypes")
         if st.session_state.df_preprocessed_for_clustering is None or st.session_state.df_preprocessed_for_clustering.empty:
             st.warning("Silakan lakukan praproses data terlebih dahulu di menu 'Praproses & Normalisasi Data'.")
@@ -738,6 +750,7 @@ def show_operator_tu_page():
                         st.error(f"Gagal menyimpan file Excel untuk Kepala Sekolah: {e}")
 
     elif st.session_state.current_menu == "Prediksi Klaster Siswa Baru":
+        # ... (konten Prediksi Klaster Siswa Baru)
         st.header("Prediksi Klaster untuk Siswa Baru")
         if st.session_state.kproto_model is None or st.session_state.scaler is None:
             st.warning("Silakan lakukan klasterisasi terlebih dahulu di menu 'Klasterisasi Data K-Prototypes' untuk melatih model dan scaler.")
@@ -813,6 +826,7 @@ def show_operator_tu_page():
                     st.pyplot(fig)
 
     elif st.session_state.current_menu == "Visualisasi & Profil Klaster":
+        # ... (konten Visualisasi & Profil Klaster)
         st.header("Visualisasi dan Interpretasi Profil Klaster")
         if st.session_state.df_preprocessed_for_clustering is None or st.session_state.df_preprocessed_for_clustering.empty:
             st.warning("Silakan unggah data dan lakukan praproses terlebih dahulu di menu 'Praproses & Normalisasi Data'.")
@@ -876,6 +890,7 @@ def show_operator_tu_page():
                 st.markdown("<div style='margin-top: 20px;'></div>", unsafe_allow_html=True)
 
     elif st.session_state.current_menu == "Lihat Profil Siswa Individual":
+        # ... (konten Lihat Profil Siswa Individual)
         st.header("Lihat Profil Siswa Berdasarkan Nama")
         if st.session_state.df_clustered is None or st.session_state.df_original is None or st.session_state.df_original.empty:
             st.warning("Silakan unggah data di menu 'Unggah Data' dan lakukan klasterisasi di menu 'Klasterisasi Data K-Prototypes' terlebih dahulu.")
@@ -1039,9 +1054,8 @@ def show_kepala_sekolah_page():
         display_name = f"{icon_map.get(option, '')} {option}"
         button_key = f"kepsek_nav_button_{option.replace(' ', '_').replace('&', 'and')}"
 
-        if st.sidebar.button(display_name, key=button_key):
-            st.session_state.kepsek_current_menu = option
-            st.rerun()
+        # Menggunakan on_click callback
+        st.sidebar.button(display_name, key=button_key, on_click=set_kepsek_menu, args=(option,))
 
     js_highlight_active_button = f"""
     <script>
@@ -1081,17 +1095,17 @@ def show_kepala_sekolah_page():
         st.markdown(js_highlight_active_button, unsafe_allow_html=True)
     
     st.sidebar.markdown("---")
-    if st.sidebar.button("🚪 Keluar", key="logout_kepsek_sidebar"):
-        st.session_state.clear()
-        st.rerun()
+    st.sidebar.button("🚪 Keluar", key="logout_kepsek_sidebar", on_click=logout)
     
     st.title("👨‍💼 Dasbor Kepala Sekolah")
     
+    # ... Konten halaman tetap sama ...
     if st.session_state.df_clustered is None or st.session_state.df_clustered.empty:
         st.warning(f"File hasil klasterisasi 'Data MA-ALHIKMAH.xlsx' tidak ditemukan atau tidak valid. Mohon minta Operator TU untuk memproses dan menyimpan hasilnya terlebih dahulu.")
         return
 
     if st.session_state.kepsek_current_menu == "Lihat Hasil Klasterisasi":
+        # ... (konten Lihat Hasil Klasterisasi)
         st.header("Hasil Klasterisasi Siswa")
         st.info("Halaman ini menampilkan data siswa yang sudah dikelompokkan ke dalam klaster.")
         st.markdown("---")
@@ -1106,6 +1120,7 @@ def show_kepala_sekolah_page():
         st.table(jumlah_per_klaster)
     
     elif st.session_state.kepsek_current_menu == "Visualisasi & Profil Klaster":
+        # ... (konten Visualisasi & Profil Klaster)
         st.header("Visualisasi dan Interpretasi Profil Klaster")
         st.info("Anda dapat melihat visualisasi dan ringkasan karakteristik dari setiap kelompok siswa.")
         st.markdown("---")
@@ -1168,6 +1183,7 @@ def show_kepala_sekolah_page():
         st.markdown("<div style='margin-top: 20px;'></div>", unsafe_allow_html=True)
         
     elif st.session_state.kepsek_current_menu == "Lihat Profil Siswa Individual":
+        # ... (konten Lihat Profil Siswa Individual)
         st.header("Lihat Profil Siswa Berdasarkan Nama")
         st.info("Pilih nama siswa dari daftar di bawah untuk melihat detail profil mereka, termasuk klaster tempat mereka berada dan karakteristiknya.")
         st.markdown("---")
